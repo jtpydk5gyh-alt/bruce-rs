@@ -60,7 +60,7 @@ trait, a driver, then on-device verification.
 
 | Order | Module | Upstream files | What it covers | Notes |
 |------:|--------|---------------:|----------------|-------|
-| 3.1 | **IR** | 11 | TV-B-Gone, send/receive, NEC/RC5/Sony/Samsung | Mostly data → great first port |
+| 3.1 | **IR** | 11 | TV-B-Gone, send/receive, NEC/RC5/Sony/Samsung | **Started**: `Ir` trait + NEC encode/decode, host-tested. Next: RC5/Sony + RMT driver |
 | 3.2 | **Others: iButton / U2F / QR / timer / clicker / audio / mic** | 18 | Grab-bag of small features | Pick off one by one between big modules |
 | 3.3 | **RFID / NFC** | 28 | PN532 / RC522, read/write/emulate, dumps | |
 | 3.4 | **RF / Sub-GHz** | 40 | CC1101, record/replay, scan, `.sub` files | Large; split into several PRs |

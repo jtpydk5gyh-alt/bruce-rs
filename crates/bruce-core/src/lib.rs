@@ -8,6 +8,8 @@
 #[macro_use]
 extern crate alloc;
 
+pub mod ir;
+
 use alloc::vec::Vec;
 use bruce_hal::{Button, Display};
 
