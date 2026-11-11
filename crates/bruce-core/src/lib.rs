@@ -10,6 +10,7 @@ extern crate alloc;
 
 pub mod gps;
 pub mod ir;
+pub mod subghz;
 
 use alloc::vec::Vec;
 use bruce_hal::{Button, Display};
