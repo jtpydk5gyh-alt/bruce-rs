@@ -42,7 +42,8 @@ Mirrors Bruce's `src/core/` (connect, menu_items, serial_commands, tftLogger, US
 
 - ☐ `Storage` impl: SD (SPI) + internal flash (FAT/SPIFFS).
 - ☐ Settings: load/save/defaults, persistence across reboots.
-- ☐ Boot flow, main menu, module dispatch matching Bruce's UX.
+- ◧ Boot flow, main menu, module dispatch matching Bruce's UX.
+  (hierarchical menu + navigation done and host-tested; dispatch to real modules pending)
 - ☐ File browser (pure logic over `Storage`, host-tested).
 - ☐ Serial command interface + USB serial.
 - ☐ `tftLogger` equivalent, panic handler, diagnostics.
