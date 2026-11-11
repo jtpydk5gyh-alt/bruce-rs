@@ -63,7 +63,7 @@ trait, a driver, then on-device verification.
 | 3.1 | **IR** | 11 | TV-B-Gone, send/receive, NEC/RC5/Sony/Samsung | **Started**: `Ir` trait + NEC encode/decode, host-tested. Next: RC5/Sony + RMT driver |
 | 3.2 | **Others: iButton / U2F / QR / timer / clicker / audio / mic** | 18 | Grab-bag of small features | Pick off one by one between big modules |
 | 3.3 | **RFID / NFC** | 28 | PN532 / RC522, read/write/emulate, dumps | |
-| 3.4 | **RF / Sub-GHz** | 40 | CC1101, record/replay, scan, `.sub` files | Large; split into several PRs |
+| 3.4 | **RF / Sub-GHz** | 40 | CC1101, record/replay, scan, `.sub` files | **Started**: `.sub` parse/write, host-tested. Next: CC1101 driver, scan |
 | 3.5 | **NRF24** | 11 | 2.4GHz tooling, jammer, scanner | |
 | 3.6 | **GPS** | 8 | NMEA parsing, wardriving logs | **Started**: GGA parser + checksum, host-tested. Next: RMC, more sentences |
 | 3.7 | **FM** | 2 | FM radio control | Small |
