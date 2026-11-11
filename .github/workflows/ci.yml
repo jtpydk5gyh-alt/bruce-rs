@@ -25,4 +25,5 @@ jobs:
         with:
           buildtargets: esp32s3
           ldproxy: false
+      - run: cd firmware && cargo clippy --release -- -D warnings
       - run: cd firmware && cargo build --release
