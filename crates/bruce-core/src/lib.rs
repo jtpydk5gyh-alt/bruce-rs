@@ -8,6 +8,7 @@
 #[macro_use]
 extern crate alloc;
 
+pub mod gps;
 pub mod ir;
 
 use alloc::vec::Vec;

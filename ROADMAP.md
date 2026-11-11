@@ -65,7 +65,7 @@ trait, a driver, then on-device verification.
 | 3.3 | **RFID / NFC** | 28 | PN532 / RC522, read/write/emulate, dumps | |
 | 3.4 | **RF / Sub-GHz** | 40 | CC1101, record/replay, scan, `.sub` files | Large; split into several PRs |
 | 3.5 | **NRF24** | 11 | 2.4GHz tooling, jammer, scanner | |
-| 3.6 | **GPS** | 8 | NMEA parsing, wardriving logs | Parser is pure logic, easy tests |
+| 3.6 | **GPS** | 8 | NMEA parsing, wardriving logs | **Started**: GGA parser + checksum, host-tested. Next: RMC, more sentences |
 | 3.7 | **FM** | 2 | FM radio control | Small |
 | 3.8 | **LoRa** | 2 | LoRa send/receive | Small |
 | 3.9 | **WiFi** | 29 | scan, evil portal, beacon spam, **deauth**, sniff, wardriving | `esp-radio`; big; see deauth note |
