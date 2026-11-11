@@ -43,6 +43,16 @@ pub trait Storage {
     fn write(&mut self, path: &str, data: &[u8]) -> bool;
 }
 
+/// Infrared transceiver. Durations are mark/space lengths in microseconds, starting with
+/// a mark. A board implements this over the ESP32 RMT peripheral.
+pub trait Ir {
+    fn send_raw(&mut self, durations: &[u16]);
+
+    fn receive_raw(&mut self, _buffer: &mut [u16]) -> usize {
+        0
+    }
+}
+
 pub trait Board {
     type Display: Display;
     type Input: Input;
