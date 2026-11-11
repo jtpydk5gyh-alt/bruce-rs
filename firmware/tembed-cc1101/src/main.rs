@@ -1,7 +1,7 @@
 //! Firmware entry for the LilyGo T-Embed CC1101 (ESP32-S3).
 //!
-//! Phase 1: bring up the chip, init the ST7789 display and draw the bruce-core menu.
-//! Encoder input and radios come next. Pins taken from LilyGo's `utilities.h`.
+//! Phase 1: bring up the chip, init the ST7789 display, read the rotary encoder and let
+//! it drive the bruce-core menu. Radios come next. Pins from LilyGo's `utilities.h`.
 
 #![no_std]
 #![no_main]
@@ -10,16 +10,19 @@
 extern crate alloc;
 
 mod display;
+mod encoder;
 
 use alloc::boxed::Box;
 
 use bruce_core::Menu;
+use bruce_hal::Input as _;
 use display::ScreenUi;
+use encoder::EncoderInput;
 use embedded_hal_bus::spi::ExclusiveDevice;
 use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
 use esp_hal::delay::Delay;
-use esp_hal::gpio::{Level, Output, OutputConfig};
+use esp_hal::gpio::{Input, InputConfig, Level, Output, OutputConfig, Pull};
 use esp_hal::spi::master::{Config as SpiConfig, Spi};
 use esp_hal::spi::Mode;
 use esp_hal::time::Rate;
@@ -63,13 +66,24 @@ fn main() -> ! {
         .invert_colors(ColorInversion::Inverted)
         .init(&mut delay)
         .unwrap();
-
     let mut screen = ScreenUi::new(panel);
-    let menu = Menu::new(vec!["WiFi", "BLE", "RF", "NFC", "IR"]);
+
+    // Rotary encoder: A=4, B=5, button=0, all active-low with pull-ups.
+    let mut input = EncoderInput::new(
+        Input::new(p.GPIO4, InputConfig::default().with_pull(Pull::Up)),
+        Input::new(p.GPIO5, InputConfig::default().with_pull(Pull::Up)),
+        Input::new(p.GPIO0, InputConfig::default().with_pull(Pull::Up)),
+    );
+
+    let mut menu = Menu::new(vec!["WiFi", "BLE", "RF", "NFC", "IR"]);
     menu.render(&mut screen);
     println!("menu drawn, {} items", menu.items.len());
 
     loop {
-        delay.delay_millis(1000);
+        if let Some(button) = input.poll() {
+            menu.on_button(button);
+            menu.render(&mut screen);
+        }
+        delay.delay_millis(2);
     }
 }
