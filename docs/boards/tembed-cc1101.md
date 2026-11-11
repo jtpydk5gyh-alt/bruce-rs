@@ -33,8 +33,9 @@ First target board for bruce-rs. A popular Bruce board with the sub-GHz radio bu
 | `Display` | ST7789V over SPI | `mipidsi` |
 | `Input` | rotary encoder + button | `esp-hal` GPIO + encoder logic in `bruce-core` |
 | `Storage` | SD card (SPI) / flash | `embedded-sdmmc` / FAT |
-| `Rf` (Phase 3) | CC1101 over SPI | custom driver |
+| `Rf` (Phase 3) | CC1101 over SPI | `cc1101-embassy` / `cc1101` (immature — may fork our own) |
 | `Nfc` (Phase 3) | PN532 over I2C | `pn532` crate |
+| WiFi/BLE (Phase 3) | ESP32-S3 radio | `esp-radio` (deauth needs raw-frame spike) |
 
 ## TODO before coding drivers
 

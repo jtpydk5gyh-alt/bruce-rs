@@ -65,12 +65,20 @@ trait, a driver, then on-device verification.
 | 3.6 | **GPS** | 8 | NMEA parsing, wardriving logs | Parser is pure logic, easy tests |
 | 3.7 | **FM** | 2 | FM radio control | Small |
 | 3.8 | **LoRa** | 2 | LoRa send/receive | Small |
-| 3.9 | **WiFi** | 29 | scan, evil portal, beacon/deauth, sniff, wardriving | `esp-wifi`; big |
+| 3.9 | **WiFi** | 29 | scan, evil portal, beacon spam, **deauth**, sniff, wardriving | `esp-radio`; big; see deauth note |
 | 3.10 | **Ethernet** | 16 | wired networking features | |
 | 3.11 | **BLE** + **BLE API** + **badUSB BLE** | 15+8+2 | scan, spam, HID over BLE | |
 | 3.12 | **Pwnagotchi** | 10 | pwnagotchi detection/interaction | Depends on WiFi |
 | 3.13 | **Reverse shell** | 2 | remote shell over network | Depends on WiFi/Ethernet |
 | 3.14 | **bjs_interpreter** | **55** | **JavaScript/Bruce-script interpreter** | Biggest single piece — see below |
+
+### On WiFi deauth (3.9)
+
+Deauth is a project goal. The Espressif WiFi stack blocks sending deauth management frames
+the normal way (the same wall ESP32 Marauder hits). Before building the deauth feature,
+the first WiFi task is a spike: prototype **raw 802.11 frame injection** via `esp-radio`
+and confirm a deauth frame actually goes out on hardware. If it can't, we document the
+limit and ship the rest of the WiFi tooling without it rather than fake it.
 
 ### On the script interpreter (3.14)
 
