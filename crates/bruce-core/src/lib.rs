@@ -10,6 +10,7 @@ extern crate alloc;
 
 pub mod gps;
 pub mod ir;
+pub mod nfc;
 pub mod subghz;
 
 use alloc::vec::Vec;
