@@ -24,12 +24,15 @@ Tracked against upstream `BruceDevices/firmware` (pin a specific commit before P
 
 ## Phase 1 — First real target
 
-- ☐ Pick first chip. **Recommended: ESP32-C3/C6 (RISC-V)** — stable upstream Rust target.
-- ☐ `esp-hal`, `esp-backtrace`, `esp-println`, `.cargo/config.toml`, `espflash` runner.
-- ☐ CI job: cross-compile firmware for the target (compile-only).
-- ☐ `board-*` binary that boots and prints over serial.
-- ☐ Real `Display` driver (`mipidsi`/SPI) and `Keyboard` driver behind the HAL.
-- 🔌 ☐ `bruce-core` menu navigable on device. **Milestone 1.**
+First board: **LilyGo T-Embed CC1101 (ESP32-S3)**.
+
+- ☑ Pick first chip (ESP32-S3, Xtensa).
+- ☑ `esp-hal`, `esp-backtrace`, `esp-println`, `.cargo/config.toml`, `espflash` runner.
+- ☑ CI job: cross-compile firmware for the target.
+- ☑ `tembed-cc1101` binary that boots and prints over serial.
+- ☑ Real `Display` driver (`mipidsi`/ST7789) draws the bruce-core menu.
+- ☑ Real `Input` driver (rotary encoder) moves the menu cursor.
+- 🔌 ☐ Flash and navigate the menu on device (install `espflash`). **Milestone 1.**
 
 ---
 
