@@ -37,8 +37,25 @@ First target board for bruce-rs. A popular Bruce board with the sub-GHz radio bu
 | `Nfc` (Phase 3) | PN532 over I2C | `pn532` crate |
 | WiFi/BLE (Phase 3) | ESP32-S3 radio | `esp-radio` (deauth needs raw-frame spike) |
 
-## TODO before coding drivers
+## GPIO (from LilyGo `examples/utilities.h`)
 
-- [ ] Pull exact GPIO assignments from the board's `pins_arduino.h` / upstream config.
-- [ ] Confirm the SPI/I2C bus layout (shared buses, CS pins).
-- [ ] Confirm display offset/rotation for the 320 × 170 panel.
+Shared SPI bus: **SCLK 11, MOSI 9, MISO 10**, with a separate CS per device.
+
+| Function | Pin |
+|----------|-----|
+| Display BL (backlight) | 21 |
+| Display CS | 41 |
+| Display DC | 16 |
+| Display RST | none (−1) |
+| Encoder A / B / button | 4 / 5 / 0 |
+| SD CS | 13 |
+| nRF24 CS (Plus variant) | 44 |
+| CC1101 / Si4463 CS | 12 |
+
+Display panel: ST7789, 170 × 320, offset x = 35 (170-wide window centred on the 240-wide
+controller), colors inverted (IPS).
+
+## TODO before on-device bring-up
+
+- [ ] Confirm display offset/rotation and color inversion on real hardware.
+- [ ] Confirm SPI bus sharing between display, SD, CC1101 and nRF24 (one bus, many CS).

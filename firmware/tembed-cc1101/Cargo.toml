@@ -11,3 +11,7 @@ esp-println = { version = "0.18.0", default-features = false, features = ["esp32
 esp-alloc = { version = "0.11.0", features = ["esp32s3"] }
 bruce-hal = { path = "../../crates/bruce-hal" }
 bruce-core = { path = "../../crates/bruce-core" }
+mipidsi = "0.10.0"
+embedded-graphics = "0.8.2"
+embedded-hal = "1.0.0"
+embedded-hal-bus = "0.3.0"
