@@ -1,7 +1,9 @@
 //! M5Stack Cardputer (ESP32-S3) board support.
-//! Phase 1 replaces these stubs with the real esp-hal display and keyboard drivers.
+//! Phase 1+ replaces these stubs with the real esp-hal display and keyboard drivers.
 
-use bruce_hal::{Board, Button, Display, Key, Keyboard};
+#![no_std]
+
+use bruce_hal::{Board, Button, Display, Input};
 
 #[derive(Default)]
 pub struct CardputerDisplay;
@@ -13,13 +15,10 @@ impl Display for CardputerDisplay {
 }
 
 #[derive(Default)]
-pub struct CardputerKeyboard;
+pub struct CardputerInput;
 
-impl Keyboard for CardputerKeyboard {
+impl Input for CardputerInput {
     fn poll(&mut self) -> Option<Button> {
-        None
-    }
-    fn read_char(&mut self) -> Option<Key> {
         None
     }
 }
@@ -27,18 +26,18 @@ impl Keyboard for CardputerKeyboard {
 #[derive(Default)]
 pub struct Cardputer {
     display: CardputerDisplay,
-    keyboard: CardputerKeyboard,
+    input: CardputerInput,
 }
 
 impl Board for Cardputer {
     type Display = CardputerDisplay;
-    type Keyboard = CardputerKeyboard;
+    type Input = CardputerInput;
 
     fn display(&mut self) -> &mut Self::Display {
         &mut self.display
     }
-    fn keyboard(&mut self) -> &mut Self::Keyboard {
-        &mut self.keyboard
+    fn input(&mut self) -> &mut Self::Input {
+        &mut self.input
     }
     fn name(&self) -> &'static str {
         "M5Stack Cardputer"
