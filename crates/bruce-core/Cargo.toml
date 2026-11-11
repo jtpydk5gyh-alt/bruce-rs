@@ -1,0 +1,8 @@
+[package]
+name = "bruce-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+bruce-hal = { path = "../bruce-hal" }
