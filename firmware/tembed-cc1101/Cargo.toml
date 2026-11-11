@@ -1,0 +1,13 @@
+[package]
+name = "tembed-cc1101"
+version = "0.0.1"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+
+[dependencies]
+esp-hal = { version = "1.2.2", features = ["esp32s3", "unstable"] }
+esp-backtrace = { version = "0.20.0", features = ["esp32s3", "panic-handler", "println"] }
+esp-println = { version = "0.18.0", default-features = false, features = ["esp32s3", "jtag-serial"] }
+esp-alloc = { version = "0.11.0", features = ["esp32s3"] }
+bruce-hal = { path = "../../crates/bruce-hal" }
+bruce-core = { path = "../../crates/bruce-core" }

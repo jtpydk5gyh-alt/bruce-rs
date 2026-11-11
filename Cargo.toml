@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = ["crates/bruce-hal", "crates/bruce-core", "crates/boards/*"]
+exclude = ["firmware"]
 
 [workspace.package]
 version = "0.0.1"

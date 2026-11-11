@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = ["tembed-cc1101"]
+
+[profile.release]
+opt-level = "s"
+lto = "fat"
