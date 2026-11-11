@@ -14,7 +14,7 @@ mod encoder;
 
 use alloc::boxed::Box;
 
-use bruce_core::Menu;
+use bruce_core::{MenuEvent, MenuNode, Navigator};
 use bruce_hal::Input as _;
 use display::ScreenUi;
 use encoder::EncoderInput;
@@ -75,14 +75,21 @@ fn main() -> ! {
         Input::new(p.GPIO0, InputConfig::default().with_pull(Pull::Up)),
     );
 
-    let mut menu = Menu::new(vec!["WiFi", "BLE", "RF", "NFC", "IR"]);
-    menu.render(&mut screen);
-    println!("menu drawn, {} items", menu.items.len());
+    let mut nav = Navigator::new(vec![
+        MenuNode::submenu("WiFi", vec![MenuNode::leaf("Scan"), MenuNode::leaf("Evil Portal")]),
+        MenuNode::submenu("BLE", vec![MenuNode::leaf("Scan"), MenuNode::leaf("Spam")]),
+        MenuNode::submenu("RF", vec![MenuNode::leaf("Read"), MenuNode::leaf("Replay")]),
+        MenuNode::leaf("NFC"),
+        MenuNode::leaf("IR"),
+    ]);
+    nav.render(&mut screen);
+    println!("menu drawn, {} items", nav.items().len());
 
     loop {
         if let Some(button) = input.poll() {
-            menu.on_button(button);
-            menu.render(&mut screen);
+            if nav.on_button(button) != MenuEvent::None {
+                nav.render(&mut screen);
+            }
         }
         delay.delay_millis(2);
     }
