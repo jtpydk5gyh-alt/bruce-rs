@@ -1,9 +1,11 @@
 # Roadmap
 
-Rewriting ~150k lines of C/C++ firmware is a long haul. The strategy is to grow outward
-from a tested, hardware-agnostic core, port one module at a time, and never merge code
-that doesn't compile and pass CI. Except where a step explicitly says "on device", every
-task is doable in GitHub Actions without owning a board.
+Bruce is **~410 source files in `src/`** across 16 feature modules plus core
+infrastructure — not a small program. Rewriting it in Rust is a multi-month, many-PR
+effort. The strategy: grow from a tested, hardware-agnostic core, port **one module per
+PR**, and never merge code that fails CI.
+
+Tracked against upstream `BruceDevices/firmware` (pin a specific commit before Phase 3).
 
 **Legend:** ☐ todo · ☑ done · 🔌 needs physical hardware to verify.
 
@@ -11,128 +13,113 @@ task is doable in GitHub Actions without owning a board.
 
 ## Phase 0 — Foundations ☑
 
-The skeleton everything else hangs off.
-
 - ☑ Cargo workspace: `bruce-hal`, `bruce-core`, `boards/*`.
 - ☑ Trait-based HAL (`Display`, `Keyboard`, `Storage`, `Board`).
-- ☑ Host-tested core (menu navigation with a unit test).
-- ☑ CI: `cargo fmt --check` + `clippy -D warnings` + `cargo test`.
-- ☐ `CONTRIBUTING.md`, PR template, `CODEOWNERS`.
-- ☐ Branch protection on `main` (no direct pushes, PR-only).
-- ☐ Issue templates (bug / feature / board-support).
-
-**Exit criteria:** green CI on a PR, `main` protected, docs in place.
+- ☑ Host-tested core (menu navigation + unit test).
+- ☑ CI: `fmt` + `clippy -D warnings` + `test`.
+- ☑ `CONTRIBUTING.md`, PR template, `CODEOWNERS`, issue templates.
+- ☑ Branch protection on `main` (PR-only, enforced for admins).
 
 ---
 
 ## Phase 1 — First real target
 
-Goal: one board that boots Rust firmware and draws a menu. This is where hardware first
-matters — everything up to the flashing step is CI-only.
-
-- ☐ Pick the first chip. **Recommended: ESP32-C3 or C6 (RISC-V).** The RISC-V Rust
-  target is upstream and stable; Xtensa (ESP32 / S2 / S3) needs the `esp-rs` toolchain
-  fork and adds friction. Start on RISC-V, bring Xtensa in Phase 4.
-- ☐ Add `esp-hal`, `esp-backtrace`, `esp-println`; set up `.cargo/config.toml` with the
-  target and the `espflash` runner.
-- ☐ Pin the toolchain and add the target to `rust-toolchain.toml`.
-- ☐ CI job: cross-compile the firmware for that target (compile-only, no device).
-- ☐ `board-*` binary that boots, inits clocks and prints over serial.
-- ☐ Real `Display` driver (likely `mipidsi` over SPI) behind `bruce-hal::Display`.
-- ☐ Real `Keyboard` driver behind `bruce-hal::Keyboard`.
-- 🔌 ☐ `bruce-core` menu rendered and navigable on the physical device. **Milestone 1.**
-
-**Exit criteria:** `cargo run` flashes the board and you can move the menu cursor on screen.
+- ☐ Pick first chip. **Recommended: ESP32-C3/C6 (RISC-V)** — stable upstream Rust target.
+- ☐ `esp-hal`, `esp-backtrace`, `esp-println`, `.cargo/config.toml`, `espflash` runner.
+- ☐ CI job: cross-compile firmware for the target (compile-only).
+- ☐ `board-*` binary that boots and prints over serial.
+- ☐ Real `Display` driver (`mipidsi`/SPI) and `Keyboard` driver behind the HAL.
+- 🔌 ☐ `bruce-core` menu navigable on device. **Milestone 1.**
 
 ---
 
 ## Phase 2 — Core infrastructure
 
-The plumbing every feature module will lean on. Mostly testable on the host.
+Mirrors Bruce's `src/core/` (connect, menu_items, serial_commands, tftLogger, USBSerial).
 
-- ☐ `Storage` trait impl: SD card (SPI) and/or internal flash (SPIFFS/FAT).
-- ☐ Settings: load/save config, defaults, persistence across reboots.
-- ☐ Boot flow: splash, main menu, module dispatch matching Bruce's UX.
-- ☐ File browser (list, open, pick) — pure logic over the `Storage` trait, host-tested.
-- ☐ Logging/serial diagnostics and a panic handler that survives in the field.
-- ☐ Async runtime decision: evaluate `embassy` vs bare `esp-hal` loop; document the choice.
-
-**Exit criteria:** boot → menu → file browser works on device; settings persist.
+- ☐ `Storage` impl: SD (SPI) + internal flash (FAT/SPIFFS).
+- ☐ Settings: load/save/defaults, persistence across reboots.
+- ☐ Boot flow, main menu, module dispatch matching Bruce's UX.
+- ☐ File browser (pure logic over `Storage`, host-tested).
+- ☐ Serial command interface + USB serial.
+- ☐ `tftLogger` equivalent, panic handler, diagnostics.
+- ☐ Async runtime decision: `embassy` vs bare `esp-hal` loop (document it).
+- ☐ Theming / UI layer.
 
 ---
 
 ## Phase 3 — Feature modules
 
-Ported one per PR, ordered easiest-to-hardest so the pure-logic parts (parsers, packet
-formats) land first and are fully unit-tested before any radio is involved.
+Full inventory from upstream `src/modules/`, with file counts as a scale hint. Ordered
+roughly easiest→hardest so pure-logic parsers land and get tested before radios appear.
+Each module is its own PR (often several): logic in `bruce-core` with tests, a `bruce-hal`
+trait, a driver, then on-device verification.
 
-### 3.1 — IR ☐
-Great starter: mostly data. Decode/encode NEC, RC5, Sony, Samsung, etc.
-- ☐ Protocol parsers + encoders in `bruce-core` (host-tested against capture fixtures).
-- ☐ `Ir` HAL trait (send/receive) + driver.
-- 🔌 ☐ TV-B-Gone-style send and raw capture on device.
+| Order | Module | Upstream files | What it covers | Notes |
+|------:|--------|---------------:|----------------|-------|
+| 3.1 | **IR** | 11 | TV-B-Gone, send/receive, NEC/RC5/Sony/Samsung | Mostly data → great first port |
+| 3.2 | **Others: iButton / U2F / QR / timer / clicker / audio / mic** | 18 | Grab-bag of small features | Pick off one by one between big modules |
+| 3.3 | **RFID / NFC** | 28 | PN532 / RC522, read/write/emulate, dumps | |
+| 3.4 | **RF / Sub-GHz** | 40 | CC1101, record/replay, scan, `.sub` files | Large; split into several PRs |
+| 3.5 | **NRF24** | 11 | 2.4GHz tooling, jammer, scanner | |
+| 3.6 | **GPS** | 8 | NMEA parsing, wardriving logs | Parser is pure logic, easy tests |
+| 3.7 | **FM** | 2 | FM radio control | Small |
+| 3.8 | **LoRa** | 2 | LoRa send/receive | Small |
+| 3.9 | **WiFi** | 29 | scan, evil portal, beacon/deauth, sniff, wardriving | `esp-wifi`; big |
+| 3.10 | **Ethernet** | 16 | wired networking features | |
+| 3.11 | **BLE** + **BLE API** + **badUSB BLE** | 15+8+2 | scan, spam, HID over BLE | |
+| 3.12 | **Pwnagotchi** | 10 | pwnagotchi detection/interaction | Depends on WiFi |
+| 3.13 | **Reverse shell** | 2 | remote shell over network | Depends on WiFi/Ethernet |
+| 3.14 | **bjs_interpreter** | **55** | **JavaScript/Bruce-script interpreter** | Biggest single piece — see below |
 
-### 3.2 — Sub-GHz / RF ☐
-- ☐ CC1101 driver behind an `Rf` trait.
-- ☐ Signal record/replay, frequency scan; `.sub`-style file format in `bruce-core`.
-- 🔌 ☐ Capture and replay a real remote.
+### On the script interpreter (3.14)
 
-### 3.3 — NFC / RFID ☐
-- ☐ PN532 / RC522 driver behind an `Nfc` trait.
-- ☐ Tag read/write/emulate logic; dump file formats (host-tested).
-- 🔌 ☐ Read and clone a test tag.
+Bruce embeds a JS interpreter so users run `.js` scripts on the device. This is the
+single largest and riskiest port. Options, to decide when we get there:
+- Reuse an existing Rust `no_std` JS/script engine if one fits the memory budget.
+- Port a smaller scripting language instead.
+- Build it last, or treat it as a stretch goal.
 
-### 3.4 — WiFi tooling ☐
-- ☐ `esp-wifi` integration behind a `Wifi` trait.
-- ☐ Scanner, beacon/probe tooling, captive-portal/evil-portal, packet-level features.
-- 🔌 ☐ Scan and run a portal on device.
-
-### 3.5 — BLE tooling ☐
-- ☐ BLE stack integration; scanner and spam/advertising features.
-- 🔌 ☐ Scan and advertise on device.
-
-**Exit criteria per module:** logic unit-tested in CI, driver compiles for the target,
-feature verified on hardware, parity entry updated.
-
----
-
-## Phase 4 — Breadth & release
-
-- ☐ Second and third boards, including the first Xtensa (ESP32-S3) board — proves the
-  HAL abstraction holds and the `esp-rs` toolchain works in CI.
-- ☐ Board-support matrix in the README, tracked against a pinned upstream Bruce commit.
-- ☐ Feature-parity table vs upstream, updated per module.
-- ☐ Release pipeline: CI builds signed `.bin` artifacts per board on tag.
-- ☐ Web/USB flasher page (like Bruce's) or clear `espflash` instructions.
-- ☐ Reproducible builds and a documented flashing guide.
-
-**Exit criteria:** `git tag vX.Y.Z` produces downloadable firmware for every supported board.
+Decide with real numbers (flash/RAM headroom) rather than up front.
 
 ---
 
-## Cross-cutting tracks (run throughout)
+## Phase 4 — Boards & breadth
 
-- **Testing:** every bit of logic ships with unit tests; capture-based fixtures for
-  protocols; `clippy -D warnings` stays green. Target: core logic independent of a board.
-- **Docs:** `ARCHITECTURE.md` kept honest; each module gets a short design note.
-- **Parity tracking:** a living table mapping each Bruce feature to its Rust status
-  (missing / in progress / done / verified on hardware).
-- **Security:** this is offensive-security tooling — document responsible-use scope and
-  keep the AGPL obligations intact in every release.
+- ☐ Bring up the first **Xtensa** board (ESP32-S3, e.g. Cardputer) — proves the HAL
+  abstraction and the `esp-rs` toolchain in CI.
+- ☐ More boards from Bruce's matrix; one `boards/*` crate each.
+- ☐ Board-support table in README, pinned to an upstream commit.
 
 ---
+
+## Phase 5 — Release & parity
+
+- ☐ Living **feature-parity table** vs upstream (per module: missing / WIP / done / 🔌 verified).
+- ☐ CI release pipeline: signed `.bin` per board on tag.
+- ☐ Web/USB flasher page or documented `espflash` guide.
+- ☐ Reproducible builds.
+
+---
+
+## Cross-cutting tracks
+
+- **Testing:** every bit of logic ships with unit tests; capture fixtures for protocols;
+  `clippy -D warnings` stays green. Core logic stays board-independent.
+- **Parity tracking:** the table in Phase 5 is the source of truth for "how done are we".
+- **Security:** offensive-security tooling — document responsible-use scope; keep AGPL intact.
+- **Cost:** local Qwen for mechanical porting, a cloud model (Opus) for architecture and
+  hard drivers.
 
 ## Working rules
 
-- One module (or one coherent change) per pull request. **Never push to `main`.**
-- Every PR: green CI, and new logic ships with unit tests.
-- `bruce-core` never imports `esp-hal`; hardware always goes through a HAL trait.
-- Track parity against a specific upstream commit, not a moving target.
-- Reserve a cloud model (Opus) for architecture and hard drivers; use the local model
-  for mechanical porting to keep cost down.
+- One module/coherent change per PR. **Never push to `main`** (enforced).
+- Every PR: green CI + tests for new logic.
+- `bruce-core` never imports `esp-hal`; hardware goes through a HAL trait.
+- Track parity against a pinned upstream commit, not a moving target.
 
-## Honest expectations
+## Honest scale check
 
-This is months of work, and the hard parts — radio timing, driver quirks, the Xtensa
-toolchain — only surface on real hardware. This structure exists so progress is always
-shippable and verifiable in CI, and the project survives being picked up and put down.
+16 modules, ~410 files, a full WiFi/BLE/RF/NFC stack and an embedded JS interpreter. Full
+parity is a long road and some of it may never be worth porting. The value is in the path:
+every PR is shippable and CI-verifiable, so the project survives being picked up and put down.
